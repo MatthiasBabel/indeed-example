@@ -26,28 +26,31 @@ app.listen(8543);
  * Creation of DB and one collection. Only call it once for a new mongo instance!
  */
 const creation = async () => {
-    MongoClient.connect(url, (err, db) => {
-        try {
-            if (err) throw err;
-            console.log("To database", dbName, "connected...")
-            let dbo = db.db(dbName)
-            dbo.createCollection(collection, (err, res) => {
-                if (err) {
-                    if (err.codeName === 'NamespaceExists') {
-                        console.log("Collection already exists")
+    return new Promise((reject, result) => {
+        MongoClient.connect(url, (err, db) => {
+            try {
+                if (err) throw err;
+                console.log("To database", dbName, "connected...")
+                let dbo = db.db(dbName)
+                dbo.createCollection(collection, (err, res) => {
+                    if (err) {
+                        if (err.codeName === 'NamespaceExists') {
+                            console.log("Collection already exists")
+                        }
+                        else throw err
+                    } else {
+                        console.log("Collection", collection, "created!")
                     }
-                    else throw err
-                } else {
-                    console.log("Collection", collection, "created!")
-                }
+                    db.close()
+                    result(true)
+                })
+            } catch (err) {
                 db.close()
-                return Promise.resolve(res)
-            })
-        } catch (err) {
-            db.close()
-            return Promise.reject(err)
-        }
+                reject(err)
+            }
+        })
     })
+
 }
 
 /**
@@ -74,7 +77,7 @@ app.get('/getAllEntries', async (req, res) => {
 
 /**
  * Adds new entry to database by http post. Format: 
- * {
+ * { 
  *  "counter": number,
  *  "date": number 
  * }
@@ -101,6 +104,7 @@ app.post('/newEntry', async (req, res) => {
 });
 
 const main = async () => {
-    //creation().catch(err => console.log(JSON.stringify(err)))
+    let test = await creation().catch(err => console.log(JSON.stringify(err)))
+    console.log("test", test)
 }
 main()
