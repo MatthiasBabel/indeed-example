@@ -26,7 +26,7 @@ app.listen(8543);
  * Creation of DB and one collection. Only call it once for a new mongo instance!
  */
 const creation = async () => {
-    return new Promise((reject, result) => {
+    return new Promise((resolve, reject) => {
         MongoClient.connect(url, (err, db) => {
             try {
                 if (err) throw err;
@@ -42,7 +42,7 @@ const creation = async () => {
                         console.log("Collection", collection, "created!")
                     }
                     db.close()
-                    result(true)
+                    resolve(true)
                 })
             } catch (err) {
                 db.close()
